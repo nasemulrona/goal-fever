@@ -1,0 +1,972 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Goal Fever - Football Tournament{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 0;
+    }
+    
+    .hero-card {
+        background: linear-gradient(135deg, rgba(26, 26, 46, 0.85), rgba(22, 33, 62, 0.85));
+        border: 2px solid;
+        border-image: linear-gradient(45deg, #ffcc00, #ff9900, #ff6600) 1;
+        border-radius: 25px;
+        padding: 60px 40px;
+        text-align: center;
+        backdrop-filter: blur(30px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: 900;
+        background: linear-gradient(45deg, #ffcc00, #ff9900, #ff6600);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 6px 25px rgba(255, 204, 0, 0.3);
+        letter-spacing: 2px;
+        margin-bottom: 1rem;
+        line-height: 1.1;
+    }
+    
+    /* Payment Notification */
+    .payment-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, rgba(0, 100, 0, 0.9), rgba(0, 150, 0, 0.9));
+        border: 2px solid #28a745;
+        border-radius: 15px;
+        padding: 15px 20px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 100, 0, 0.4);
+        z-index: 9999;
+        max-width: 350px;
+        animation: slideInRight 0.5s ease-out;
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+    
+    .notification-close:hover {
+        opacity: 1;
+    }
+    
+    /* Tournament Badge */
+    .tournament-badge {
+        background: linear-gradient(45deg, #ff3366, #ff0066);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        animation: pulse 2s infinite;
+        box-shadow: 0 8px 25px rgba(255, 51, 102, 0.4);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .tournament-badge::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: rotate(45deg);
+        animation: shine 3s infinite;
+    }
+    
+    /* Features */
+    .feature-grid {
+        margin: 50px 0;
+    }
+    
+    .feature-card {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 204, 0, 0.2);
+        border-radius: 20px;
+        padding: 30px 25px;
+        text-align: center;
+        height: 100%;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .feature-card:hover {
+        background: rgba(255, 204, 0, 0.15);
+        border-color: rgba(255, 204, 0, 0.4);
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(255, 204, 0, 0.2);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Stats */
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        background: rgba(255, 204, 0, 0.1);
+        border-color: rgba(255, 204, 0, 0.3);
+        transform: scale(1.05);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+    
+    /* Player Cards */
+    .player-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .player-card:hover {
+        background: rgba(255, 204, 0, 0.1);
+        border-color: rgba(255, 204, 0, 0.3);
+        transform: translateY(-5px);
+    }
+    
+    .player-avatar {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.8rem;
+        color: #000;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+    }
+    
+    /* Team Logos */
+    .team-logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-size: 1.2rem;
+        color: #000;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+    }
+    
+    /* Gradient Text */
+    .gradient-text {
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 600;
+    }
+    
+    /* Registration Status Badges */
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-pending {
+        background: linear-gradient(45deg, #ff9900, #ff6600);
+        color: white;
+    }
+    
+    .status-confirmed {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .status-notpaid {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        color: white;
+    }
+    
+    /* Registration Button */
+    .registration-btn {
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        border: none;
+        color: #000;
+        font-weight: bold;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        transition: all 0.3s;
+        box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+        animation: pulse 2s infinite;
+    }
+    
+    .registration-btn:hover {
+        background: linear-gradient(45deg, #ff9900, #ff6600);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(255, 204, 0, 0.6);
+        color: #000;
+    }
+    
+    /* Match stats badges */
+    .win-badge {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .loss-badge {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        color: white;
+    }
+    
+    .goal-badge {
+        background: linear-gradient(45deg, #007bff, #17a2b8);
+        color: white;
+    }
+    
+    /* Keyframes for animations */
+    @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 12px 30px rgba(255, 204, 0, 0.6); }
+        100% { transform: scale(1); box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4); }
+    }
+    
+    @keyframes shine {
+        0% { transform: rotate(45deg) translateX(-100%); }
+        100% { transform: rotate(45deg) translateX(100%); }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.8rem;
+        }
+        
+        .hero-card {
+            padding: 40px 20px;
+            margin: 0 15px;
+        }
+        
+        .tournament-badge {
+            font-size: 0.9rem;
+            padding: 8px 20px;
+        }
+        
+        .registration-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+        
+        .payment-notification {
+            left: 20px;
+            right: 20px;
+            max-width: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if not user.is_authenticated %}
+<!-- Hero Section for Non-Logged In Users -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="hero-card animate-float">
+                    <!-- Main Title -->
+                    <h1 class="hero-title mb-4">
+                        GOAL FEVER
+                    </h1>
+                    
+                    <h3 class="text-light mb-5 animate-fade-in" style="animation-delay: 0.2s;">
+                        <i class="fas fa-futbol me-2" style="color: #ffcc00;"></i>
+                        Ultimate Football Tournament Platform
+                    </h3>
+                    
+                    <!-- Tournament Info -->
+                    <div class="mb-5 animate-fade-in" style="animation-delay: 0.4s;">
+                        <div class="d-inline-flex flex-column flex-md-row align-items-center gap-3 mb-4">
+                            <span class="badge bg-warning text-dark px-4 py-2 fs-5">
+                                <i class="fas fa-trophy me-2"></i>WORLD CUP 2026
+                            </span>
+                            <span class="tournament-badge">
+                                <i class="fas fa-coins me-2"></i>Entry Fee: 150৳
+                            </span>
+                        </div>
+                        <p class="lead text-light mb-0">
+                            Join the biggest online football tournament! Register, select your team, 
+                            and compete with players worldwide.
+                        </p>
+                    </div>
+                    
+                    <!-- Main Action Button -->
+                    <div class="d-grid gap-3 col-lg-6 mx-auto mb-5 animate-fade-in" style="animation-delay: 0.6s;">
+                        <a href="{% url 'login' %}" class="btn btn-gold btn-lg animate-pulse">
+                            <i class="fas fa-sign-in-alt me-2"></i> 
+                            <strong>JOIN THE TOURNAMENT</strong>
+                        </a>
+                        
+                        <p class="text-light mt-3">
+                            New to Goal Fever? 
+                            <a href="{% url 'register' %}" class="gradient-text fw-bold text-decoration-none">
+                                Create your account now!
+                            </a>
+                        </p>
+                    </div>
+                    
+                    <!-- Features -->
+                    <div class="feature-grid animate-fade-in" style="animation-delay: 0.8s;">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="feature-card">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <h5 class="gradient-text mb-3">32 Teams</h5>
+                                    <p class="text-light mb-0">Choose from 32 international teams</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <h5 class="gradient-text mb-3">Live Rankings</h5>
+                                    <p class="text-light mb-0">Real-time player rankings</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <h5 class="gradient-text mb-3">Scheduled Matches</h5>
+                                    <p class="text-light mb-0">Organized tournament schedule</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="row g-4 mt-4 animate-fade-in" style="animation-delay: 1s;">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">500+</div>
+                                <p class="text-light mb-0">Players</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">1000+</div>
+                                <p class="text-light mb-0">Matches</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">50K+</div>
+                                <p class="text-light mb-0">Prize Pool</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-number">15+</div>
+                                <p class="text-light mb-0">Countries</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Dashboard for Logged In Users -->
+<div class="container py-4">
+    <!-- Payment Notification (Shows only when payment is confirmed) -->
+    {% if user_registration and user_registration.payment_confirmed %}
+    <div class="payment-notification" id="paymentNotification">
+        <div class="notification-header">
+            <h5 class="mb-0">
+                <i class="fas fa-check-circle me-2"></i>
+                Payment Confirmed!
+            </h5>
+            <button class="notification-close" onclick="closeNotification()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <p class="mb-0">Your payment has been confirmed by admin. You're now officially in the tournament!</p>
+    </div>
+    {% endif %}
+    
+    <!-- Welcome Banner with Profile and Logout -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4 animate-fade-in">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" 
+                                     alt="{{ user.username }}" 
+                                     class="rounded-circle me-3"
+                                     width="60" 
+                                     height="60"
+                                     style="object-fit: cover; border: 2px solid #ffcc00;">
+                            {% else %}
+                                <div class="rounded-circle me-3" 
+                                     style="width: 60px; height: 60px; background: linear-gradient(45deg, #ffcc00, #ff9900); 
+                                            display: flex; align-items: center; justify-content: center; border: 2px solid #ffcc00;">
+                                    <i class="fas fa-user fa-lg" style="color: #000;"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h1 class="gradient-text mb-1">
+                                    <i class="fas fa-hand-sparkles me-2"></i>Welcome, {{ user.username }}!
+                                </h1>
+                                <p class="text-light mb-0">
+                                    <i class="fas fa-gamepad me-1"></i>
+                                    {% if user.gaming_id %}
+                                        {{ user.gaming_id }}
+                                    {% else %}
+                                        <a href="{% url 'profile' %}" class="text-warning">Set Gaming ID in Profile</a>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                            <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-user-edit me-1"></i> Profile
+                            </a>
+                            <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                </button>
+                            </form>
+                            <div class="tournament-badge d-inline-flex mt-2 mt-md-0">
+                                <i class="fas fa-coins me-2"></i>Entry Fee: 150৳
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Registration Status -->
+    {% if user_registration %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert {% if user_registration.payment_confirmed %}alert-success{% elif user_registration.is_paid %}alert-warning{% else %}alert-info{% endif %} glass-card">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-{% if user_registration.payment_confirmed %}check-circle{% elif user_registration.is_paid %}clock{% else %}info-circle{% endif %} fa-2x me-3"></i>
+                    <div>
+                        <h5 class="mb-1">
+                            Registration Status: 
+                            {% if user_registration.payment_confirmed %}
+                                <span class="badge bg-success">Confirmed</span>
+                            {% elif user_registration.is_paid %}
+                                <span class="badge bg-warning">Pending Verification</span>
+                            {% else %}
+                                <span class="badge bg-info">Not Paid</span>
+                            {% endif %}
+                        </h5>
+                        <p class="mb-0">
+                            Team: <strong>{{ user_registration.selected_team.name }}</strong> | 
+                            {% if user_registration.transaction_id %}
+                                Transaction: {{ user_registration.transaction_id }} | 
+                            {% endif %}
+                            {% if user_registration.payment_method %}
+                                Method: {{ user_registration.payment_method }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Main Tournament Card with Registration -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-5 text-center animate-fade-in" style="animation-delay: 0.2s;">
+                <h1 class="display-4 mb-3 gradient-text">
+                    <i class="fas fa-trophy me-3"></i>WORLD CUP 2026
+                </h1>
+                <p class="lead mb-4 text-light">
+                    Registration Deadline: 
+                    <span class="fw-bold" style="color: #ffcc00;">{{ active_tournament.registration_deadline|date:"F d, Y" }}</span>
+                </p>
+                
+                <!-- Registration Logic -->
+                {% if not user.is_admin and not user.is_superuser %}
+                    {% if active_tournament %}
+                        {% if user_registered %}
+                            <!-- User is already registered and payment confirmed -->
+                            <div class="alert alert-success glass-card border-success">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-check-circle fa-2x me-3" style="color: #28a745;"></i>
+                                    <div>
+                                        <h5 class="mb-1 gradient-text">Registration Complete!</h5>
+                                        <p class="mb-0 text-light">You are officially registered for the tournament.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% elif user_registration and not user_registration.payment_confirmed %}
+                            <!-- User has pending registration -->
+                            {% if user_registration.is_paid %}
+                            <div class="alert alert-info glass-card border-info">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-clock fa-2x me-3" style="color: #17a2b8;"></i>
+                                    <div>
+                                        <h5 class="mb-1 gradient-text">Payment Submitted</h5>
+                                        <p class="mb-0 text-light">Waiting for admin verification. Please be patient.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning glass-card border-warning">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x me-3" style="color: #ffc107;"></i>
+                                    <div>
+                                        <h5 class="mb-1 gradient-text">Payment Required</h5>
+                                        <p class="mb-0 text-light">Please complete payment to confirm your registration.</p>
+                                        <a href="{% url 'payment_page' registration_id=user_registration.id %}" 
+                                           class="btn btn-warning mt-2">
+                                            <i class="fas fa-credit-card me-1"></i> Complete Payment Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <!-- Registration Button for new users -->
+                            <a href="{% url 'tournament_register' tournament_id=active_tournament.id %}" 
+                               class="registration-btn">
+                                <i class="fas fa-user-plus me-2"></i> 
+                                <strong>REGISTER NOW - 150৳</strong>
+                            </a>
+                            <p class="text-light mt-3">
+                                <i class="fas fa-info-circle me-2" style="color: #ffcc00;"></i>
+                                Secure your spot in the tournament with 150৳ registration fee
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning glass-card border-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No active tournament at the moment. Check back soon!
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info glass-card border-info">
+                        <i class="fas fa-user-shield me-2"></i>
+                        <strong>Admin Panel</strong> - You can manage tournaments from the admin panel.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if not user.is_admin and not user.is_superuser %}
+    <!-- Two Column Layout -->
+    <div class="row g-4">
+        <!-- Left Column: Rankings -->
+        <div class="col-lg-8">
+            <!-- Rankings Card -->
+            <div class="glass-card p-4 h-100 animate-fade-in" style="animation-delay: 0.4s;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="gradient-text mb-0">
+                        <i class="fas fa-crown me-2"></i>Top Players (Based on Wins, Goals & Performance)
+                    </h3>
+                    <span class="badge bg-dark">Live Rankings</span>
+                </div>
+                
+                {% if top_players %}
+                <div class="row mb-4">
+                    <!-- Top Player -->
+                    <div class="col-md-4 text-center mb-4">
+                        {% if top_players.0 %}
+                        <div class="player-card">
+                            <div class="player-avatar">1</div>
+                            <h5 class="gradient-text">{{ top_players.0.user.username }}</h5>
+                            <div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
+                                <span class="badge win-badge" title="Matches Won">
+                                    <i class="fas fa-trophy me-1"></i>{{ top_players.0.matches_won }}
+                                </span>
+                                <span class="badge loss-badge" title="Matches Lost">
+                                    <i class="fas fa-times me-1"></i>{{ top_players.0.matches_lost|default:"0" }}
+                                </span>
+                                <span class="badge goal-badge" title="Total Goals">
+                                    <i class="fas fa-futbol me-1"></i>{{ top_players.0.total_goals }}
+                                </span>
+                            </div>
+                            <p class="text-light mt-2 small">
+                                Win Rate: {{ top_players.0.win_percentage|floatformat:1 }}% | 
+                                Total Matches: {{ top_players.0.total_matches|default:"0" }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="table-responsive">
+                            <table class="table table-dark align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Rank</th>
+                                        <th>Player</th>
+                                        <th class="text-center">W</th>
+                                        <th class="text-center">L</th>
+                                        <th class="text-center">Goals</th>
+                                        <th class="text-center">Matches</th>
+                                        <th class="text-center">Win %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for player in top_players %}
+                                    {% if not player.user.is_admin and not player.user.is_superuser %}
+                                    <tr {% if player.user == user %}class="table-warning"{% endif %}>
+                                        <td class="text-center">
+                                            {% if forloop.counter == 1 %}
+                                                <span class="badge bg-warning">#{{ forloop.counter }}</span>
+                                            {% elif forloop.counter == 2 %}
+                                                <span class="badge bg-secondary">#{{ forloop.counter }}</span>
+                                            {% elif forloop.counter == 3 %}
+                                                <span class="badge bg-danger">#{{ forloop.counter }}</span>
+                                            {% else %}
+                                                <span class="badge bg-dark">#{{ forloop.counter }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-user-circle me-2" style="color: #ffcc00;"></i>
+                                                {% if player.user == user %}
+                                                    <strong class="gradient-text">{{ player.user.username }} (You)</strong>
+                                                {% else %}
+                                                    {{ player.user.username }}
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge win-badge">{{ player.matches_won }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge loss-badge">{{ player.matches_lost|default:"0" }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge goal-badge">{{ player.total_goals }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            {{ player.total_matches|default:"0" }}
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge {% if player.win_percentage >= 50 %}bg-success{% else %}bg-dark{% endif %}">
+                                                {{ player.win_percentage|floatformat:1 }}%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-4"></i>
+                    <h5 class="gradient-text">No rankings yet</h5>
+                    <p class="text-light">Be the first to make your mark!</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Recent Registrations -->
+            {% if recent_registrations %}
+            <div class="glass-card p-4 mt-4 animate-fade-in" style="animation-delay: 0.6s;">
+                <h4 class="gradient-text mb-4">
+                    <i class="fas fa-user-plus me-2"></i> Recent Registrations
+                </h4>
+                <div class="table-responsive">
+                    <table class="table table-dark align-middle">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in recent_registrations|slice:":10" %}
+                            <tr {% if reg.player == user %}class="table-warning"{% endif %}>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle me-2" style="color: #ffcc00;"></i>
+                                        {{ reg.player.username }}
+                                        {% if reg.player == user %}
+                                            <span class="badge bg-warning text-dark ms-2">You</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ reg.selected_team.name }}</td>
+                                <td class="text-center">
+                                    {% if reg.payment_confirmed %}
+                                        <span class="status-badge status-confirmed">
+                                            Confirmed
+                                        </span>
+                                    {% elif reg.is_paid %}
+                                        <span class="status-badge status-pending">
+                                            Pending
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-notpaid">
+                                            Not Paid
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <small>{{ reg.registration_date|date:"M d, Y" }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Column: Stats & Schedule -->
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="glass-card p-4 mb-4 animate-fade-in" style="animation-delay: 0.5s;">
+                <h4 class="gradient-text mb-4">
+                    <i class="fas fa-chart-line me-2"></i> Tournament Stats
+                </h4>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ total_registrations|default:"0" }}</div>
+                            <p class="text-light mb-0">Confirmed</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ live_matches|default:"0" }}</div>
+                            <p class="text-light mb-0">Live</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ completed_matches|default:"0" }}</div>
+                            <p class="text-light mb-0">Completed</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ upcoming_matches|default:"0" }}</div>
+                            <p class="text-light mb-0">Upcoming</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Your Registration Details -->
+            {% if user_registration %}
+            <div class="glass-card p-4 mb-4 animate-fade-in" style="animation-delay: 0.6s;">
+                <h4 class="gradient-text mb-4">
+                    <i class="fas fa-info-circle me-2"></i> Your Registration
+                </h4>
+                <div class="text-center">
+                    <div class="mb-3">
+                        {% if user_registration.payment_confirmed %}
+                            <i class="fas fa-check-circle fa-4x" style="color: #28a745;"></i>
+                            <h5 class="gradient-text mt-3">Confirmed</h5>
+                            <p class="text-light mb-2">You're in the tournament!</p>
+                        {% elif user_registration.is_paid %}
+                            <i class="fas fa-clock fa-4x" style="color: #17a2b8;"></i>
+                            <h5 class="gradient-text mt-3">Pending Verification</h5>
+                            <p class="text-light mb-2">Waiting for admin to verify payment</p>
+                        {% else %}
+                            <i class="fas fa-credit-card fa-4x" style="color: #ffc107;"></i>
+                            <h5 class="gradient-text mt-3">Payment Required</h5>
+                            <p class="text-light mb-2">Complete payment to confirm registration</p>
+                            <a href="{% url 'payment_page' registration_id=user_registration.id %}" class="btn btn-warning btn-sm mt-2">
+                                <i class="fas fa-credit-card me-1"></i> Pay Now
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Payment Details if exists -->
+                    {% if user_registration.transaction_id or user_registration.mobile_number %}
+                    <div class="mt-3 pt-3 border-top border-secondary">
+                        <p class="text-light small mb-1">
+                            <i class="fas fa-hashtag me-1"></i>
+                            <strong>Reg ID:</strong> GF{{ user_registration.id }}
+                        </p>
+                        {% if user_registration.transaction_id %}
+                        <p class="text-light small mb-1">
+                            <i class="fas fa-receipt me-1"></i>
+                            <strong>Transaction:</strong> {{ user_registration.transaction_id }}
+                        </p>
+                        {% endif %}
+                        {% if user_registration.mobile_number %}
+                        <p class="text-light small mb-1">
+                            <i class="fas fa-mobile-alt me-1"></i>
+                            <strong>Mobile:</strong> {{ user_registration.mobile_number }}
+                        </p>
+                        {% endif %}
+                        {% if user_registration.payment_method %}
+                        <p class="text-light small mb-0">
+                            <i class="fas fa-wallet me-1"></i>
+                            <strong>Method:</strong> {{ user_registration.payment_method }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Schedule -->
+            <div class="glass-card p-4 animate-fade-in" style="animation-delay: 0.7s;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="gradient-text mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i> Upcoming Matches
+                    </h4>
+                    {% if schedules %}
+                    <a href="#" class="btn btn-sm btn-outline-warning">
+                        View All
+                    </a>
+                    {% endif %}
+                </div>
+                
+                {% if schedules %}
+                <div class="list-group list-group-flush">
+                    {% for schedule in schedules|slice:":5" %}
+                    <div class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <h6 class="mb-1 gradient-text">{{ schedule.tournament.name }}</h6>
+                            <small>Round {{ schedule.round_number }}</small>
+                        </div>
+                        <span class="badge bg-dark">Soon</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
+                    <p class="text-light">Schedule coming soon...</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+    // Close notification function
+    function closeNotification() {
+        const notification = document.getElementById('paymentNotification');
+        if (notification) {
+            notification.style.animation = 'fadeOut 0.5s ease-out';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 500);
+        }
+    }
+    
+    // Auto-hide notification after 10 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const notification = document.getElementById('paymentNotification');
+        if (notification) {
+            setTimeout(() => {
+                closeNotification();
+            }, 10000);
+        }
+    });
+</script>
+{% endblock %}

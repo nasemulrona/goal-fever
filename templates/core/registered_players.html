@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Team - Goal Fever{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-selection-container {
+        min-height: 80vh;
+        padding: 40px 0;
+    }
+    
+    .selection-card {
+        background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+        border: 2px solid;
+        border-image: linear-gradient(45deg, #ffcc00, #ff9900, #ff6600) 1;
+        border-radius: 25px;
+        padding: 40px;
+        backdrop-filter: blur(30px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+    }
+    
+    .team-grid {
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 15px;
+    }
+    
+    .team-grid::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    .team-grid::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    
+    .team-grid::-webkit-scrollbar-thumb {
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        border-radius: 10px;
+    }
+    
+    .team-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+    }
+    
+    .team-card:hover {
+        background: rgba(255, 204, 0, 0.15);
+        border-color: rgba(255, 204, 0, 0.4);
+        transform: translateY(-5px);
+    }
+    
+    .team-card.selected {
+        background: rgba(255, 204, 0, 0.25);
+        border-color: #ffcc00;
+        box-shadow: 0 8px 25px rgba(255, 204, 0, 0.3);
+    }
+    
+    .team-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.5rem;
+        color: #000;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+    }
+    
+    .team-name {
+        color: #ffcc00;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .team-country {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+    
+    .registration-btn {
+        background: linear-gradient(45deg, #ffcc00, #ff9900);
+        border: none;
+        color: #000;
+        font-weight: bold;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        transition: all 0.3s;
+        box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+    }
+    
+    .registration-btn:hover {
+        background: linear-gradient(45deg, #ff9900, #ff6600);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(255, 204, 0, 0.6);
+        color: #000;
+    }
+    
+    .registration-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="team-selection-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="selection-card">
+                    <!-- Header -->
+                    <div class="text-center mb-5">
+                        <h1 class="gradient-text mb-3">
+                            <i class="fas fa-trophy me-2"></i>Select Your Team
+                        </h1>
+                        <p class="lead text-light">
+                            Choose from 32 international teams for <strong class="text-warning">WORLD CUP 2026</strong>
+                        </p>
+                        <div class="d-inline-flex align-items-center gap-3 mb-4">
+                            <span class="badge bg-warning text-dark px-4 py-2">
+                                <i class="fas fa-coins me-2"></i>Entry Fee: 150৳
+                            </span>
+                            <span class="badge bg-success px-4 py-2">
+                                <i class="fas fa-users me-2"></i>32 Teams Available
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Selection Form -->
+                    <form method="POST" id="teamSelectionForm">
+                        {% csrf_token %}
+                        
+                        <!-- Teams Grid -->
+                        <div class="team-grid mb-5">
+                            <div class="row g-4">
+                                {% for team in teams %}
+                                <div class="col-md-3 col-6">
+                                    <div class="team-card" onclick="selectTeam(this, {{ team.id }})">
+                                        <div class="team-logo">
+                                            {% if team.logo %}
+                                                <img src="{{ team.logo.url }}" alt="{{ team.name }}" class="img-fluid rounded-circle">
+                                            {% else %}
+                                                {{ team.name|slice:":2"|upper }}
+                                            {% endif %}
+                                        </div>
+                                        <h6 class="team-name">{{ team.name }}</h6>
+                                        <div class="team-country">{{ team.country }}</div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-12 text-center py-5">
+                                    <i class="fas fa-exclamation-triangle fa-3x text-muted mb-4"></i>
+                                    <h5 class="text-light">No teams available</h5>
+                                    <a href="{% url 'home' %}" class="btn btn-outline-light mt-3">
+                                        <i class="fas fa-arrow-left me-2"></i> Back to Home
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden Input for Selected Team -->
+                        <input type="hidden" name="team" id="selectedTeamId">
+                        
+                        <!-- Selected Team Display -->
+                        <div id="selectedTeamDisplay" class="d-none mb-4">
+                            <div class="alert alert-warning glass-card border-warning">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h5 class="mb-1">
+                                            <i class="fas fa-check-circle me-2" style="color: #ffcc00;"></i>
+                                            Selected Team: <span id="selectedTeamName" class="text-warning"></span>
+                                        </h5>
+                                        <p class="mb-0 text-light">Click "Proceed to Payment" to continue</p>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-light" onclick="clearSelection()">
+                                        <i class="fas fa-times me-1"></i> Change
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="text-center">
+                            <button type="submit" class="registration-btn" id="submitBtn" disabled>
+                                <i class="fas fa-credit-card me-2"></i> Proceed to Payment - 150৳
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-outline-light ms-3">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedTeam = null;
+    
+    function selectTeam(element, teamId) {
+        // Remove previous selection
+        document.querySelectorAll('.team-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selection to clicked card
+        element.classList.add('selected');
+        selectedTeam = {
+            id: teamId,
+            name: element.querySelector('.team-name').textContent
+        };
+        
+        // Update hidden input
+        document.getElementById('selectedTeamId').value = teamId;
+        
+        // Show selected team display
+        document.getElementById('selectedTeamName').textContent = selectedTeam.name;
+        document.getElementById('selectedTeamDisplay').classList.remove('d-none');
+        
+        // Enable submit button
+        document.getElementById('submitBtn').disabled = false;
+    }
+    
+    function clearSelection() {
+        // Clear selection
+        document.querySelectorAll('.team-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Hide selected team display
+        document.getElementById('selectedTeamDisplay').classList.add('d-none');
+        
+        // Disable submit button
+        document.getElementById('submitBtn').disabled = true;
+        
+        // Reset hidden input
+        document.getElementById('selectedTeamId').value = '';
+        selectedTeam = null;
+    }
+    
+    // Form submission
+    document.getElementById('teamSelectionForm').addEventListener('submit', function(e) {
+        if (!selectedTeam) {
+            e.preventDefault();
+            alert('Please select a team first!');
+            return false;
+        }
+        
+        // Show loading
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+        submitBtn.disabled = true;
+        
+        return true;
+    });
+</script>
+{% endblock %}

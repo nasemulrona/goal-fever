@@ -1,0 +1,789 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - Goal Fever{% endblock %}
+
+{% block content %}
+<style>
+/* Netflix-inspired dark theme - Same as login page */
+body {
+    background: #141414;
+    color: #fff;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Hide navigation on register page */
+nav, .navbar, header {
+    display: none !important;
+}
+
+.register-wrapper {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('{% static "images/login-bg.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.register-container {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 4px;
+    padding: 60px 68px 40px;
+    margin: 20px auto;
+}
+
+@media (max-width: 600px) {
+    .register-container {
+        padding: 40px 20px;
+        margin: 0;
+        background: rgba(0, 0, 0, 0.9);
+        border-radius: 0;
+    }
+}
+
+/* Logo */
+.brand-logo {
+    color: #e50914;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 28px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.brand-logo i {
+    margin-right: 10px;
+}
+
+/* Form Elements */
+.register-title {
+    color: #fff;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 28px;
+}
+
+.register-form input,
+.register-form select {
+    width: 100%;
+    height: 50px;
+    background: #333;
+    border: 0;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
+
+.register-form input:focus,
+.register-form select:focus {
+    background: #454545;
+    outline: none;
+}
+
+.register-form input::placeholder,
+.register-form select::placeholder {
+    color: #8c8c8c;
+}
+
+/* File Input Styling */
+.file-input-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.file-input-label {
+    display: block;
+    width: 100%;
+    height: 50px;
+    background: #333;
+    border-radius: 4px;
+    padding: 16px 20px;
+    color: #8c8c8c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.file-input-label:hover {
+    background: #454545;
+}
+
+.file-input-label i {
+    color: #e50914;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-name {
+    color: #fff;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 16px;
+}
+
+/* Submit Button */
+.register-button {
+    width: 100%;
+    height: 50px;
+    background: #e50914;
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: background 0.2s ease;
+}
+
+.register-button:hover {
+    background: #f6121d;
+}
+
+.register-button:active {
+    background: #b20710;
+}
+
+.register-button:disabled {
+    background: #333;
+    cursor: not-allowed;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin: 10px 0;
+}
+
+.strength-meter {
+    height: 5px;
+    background: #333;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.strength-text {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+/* Terms and Conditions */
+.terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    margin: 20px 0;
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+.terms-checkbox input {
+    width: auto;
+    margin-top: 3px;
+    margin-right: 10px;
+}
+
+.terms-checkbox a {
+    color: #e50914;
+    text-decoration: none;
+}
+
+.terms-checkbox a:hover {
+    text-decoration: underline;
+}
+
+/* Sign In Link */
+.signin-now {
+    color: #737373;
+    font-size: 16px;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.signin-now a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.signin-now a:hover {
+    text-decoration: underline;
+}
+
+/* Footer */
+.register-footer {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 20px 0;
+    margin-top: 60px;
+    color: #737373;
+    font-size: 13px;
+}
+
+.footer-links {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-links a {
+    color: #737373;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+/* Error States */
+.error-message {
+    background: #e87c03;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.input-error {
+    border-bottom: 2px solid #e87c03 !important;
+}
+
+.success-message {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+/* Loading Spinner */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    .register-title {
+        font-size: 24px;
+    }
+    
+    .register-form input,
+    .register-form select {
+        height: 44px;
+        font-size: 15px;
+    }
+    
+    .register-button {
+        height: 44px;
+        font-size: 15px;
+    }
+    
+    .footer-links {
+        text-align: center;
+    }
+    
+    .footer-links a {
+        display: inline-block;
+        margin: 5px;
+    }
+}
+
+/* Password Toggle */
+.password-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #8c8c8c;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+}
+
+.toggle-password:hover {
+    color: #fff;
+}
+
+/* Form Grid */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+</style>
+
+<div class="register-wrapper">
+    <div class="register-container">
+        <!-- Logo -->
+        <div class="brand-logo" onclick="window.location='{% url 'home' %}'">
+            <i class="fas fa-futbol"></i>GOAL FEVER
+        </div>
+
+        <!-- Title -->
+        <h1 class="register-title">Sign Up</h1>
+
+        <!-- Error/Success Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.errors %}
+            <div class="error-message">
+                Please correct the errors below.
+            </div>
+        {% endif %}
+
+        <!-- Registration Form -->
+        <form method="POST" class="register-form" id="registerForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Username -->
+            <input type="text" 
+                   name="username" 
+                   placeholder="Username *" 
+                   required
+                   autocomplete="username"
+                   autocapitalize="none"
+                   autocorrect="off"
+                   value="{{ form.username.value|default:'' }}">
+            {% if form.username.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Email -->
+            <input type="email" 
+                   name="email" 
+                   placeholder="Email *" 
+                   required
+                   autocomplete="email"
+                   value="{{ form.email.value|default:'' }}">
+            {% if form.email.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Gaming ID -->
+            <input type="text" 
+                   name="gaming_id" 
+                   placeholder="Gaming ID *" 
+                   required
+                   autocomplete="off"
+                   value="{{ form.gaming_id.value|default:'' }}">
+            {% if form.gaming_id.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.gaming_id.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Phone Number -->
+            <input type="tel" 
+                   name="phone" 
+                   placeholder="Phone Number *" 
+                   required
+                   autocomplete="tel"
+                   value="{{ form.phone.value|default:'' }}">
+            {% if form.phone.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.phone.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Password 1 -->
+            <div class="password-container">
+                <input type="password" 
+                       name="password1" 
+                       id="password1"
+                       placeholder="Password *" 
+                       required
+                       autocomplete="new-password">
+                <button type="button" class="toggle-password" data-target="password1">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            {% if form.password1.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.password1.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Password Strength -->
+            <div class="password-strength">
+                <div class="strength-meter">
+                    <div class="strength-fill" id="passwordStrength"></div>
+                </div>
+                <div class="strength-text" id="passwordStrengthText">Password strength</div>
+            </div>
+            
+            <!-- Password 2 -->
+            <div class="password-container">
+                <input type="password" 
+                       name="password2" 
+                       id="password2"
+                       placeholder="Confirm Password *" 
+                       required
+                       autocomplete="new-password">
+                <button type="button" class="toggle-password" data-target="password2">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            {% if form.password2.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.password2.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Profile Picture (ONLY OPTIONAL) -->
+            <div class="file-input-container">
+                <label class="file-input-label">
+                    <span id="fileLabelText">Profile Picture (Optional)</span>
+                    <i class="fas fa-camera"></i>
+                    <input type="file" 
+                           class="file-input" 
+                           id="profile_picture" 
+                           name="profile_picture" 
+                           accept="image/*">
+                </label>
+                <div class="file-name" id="fileName"></div>
+            </div>
+            {% if form.profile_picture.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.profile_picture.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Terms and Conditions -->
+            <div class="terms-checkbox">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">
+                    I agree to the <a href="#" onclick="showTerms()">Terms of Service</a> and 
+                    <a href="#" onclick="showPrivacy()">Privacy Policy</a> *
+                </label>
+            </div>
+            {% if form.terms.errors %}
+                <div style="color: #e87c03; font-size: 12px; margin-top: -10px; margin-bottom: 10px;">
+                    {{ form.terms.errors.0 }}
+                </div>
+            {% endif %}
+            
+            <!-- Submit Button -->
+            <button type="submit" class="register-button" id="submitButton">
+                <span id="buttonText">Create Account</span>
+                <span id="loadingSpinner" class="spinner" style="display: none;"></span>
+            </button>
+        </form>
+
+        <!-- Sign In Link -->
+        <div class="signin-now">
+            Already have an account? 
+            <a href="{% url 'login' %}">Sign in now.</a>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="register-footer">
+    <div class="footer-links">
+        <a href="#" onclick="showAlert('FAQ')">FAQ</a>
+        <a href="#" onclick="showAlert('Help Center')">Help Center</a>
+        <a href="#" onclick="showAlert('Terms of Use')">Terms of Use</a>
+        <a href="#" onclick="showAlert('Privacy')">Privacy</a>
+        <a href="#" onclick="showAlert('Cookie Preferences')">Cookie Preferences</a>
+        <a href="#" onclick="showAlert('Contact Us')">Contact Us</a>
+        <br><br>
+        <span>© {% now "Y" %} Goal Fever. All rights reserved.</span>
+    </div>
+</div>
+
+<script>
+// Registration Form JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    const submitButton = document.getElementById('submitButton');
+    const buttonText = document.getElementById('buttonText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    // Password toggle functionality
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.innerHTML = type === 'password' 
+                ? '<i class="fas fa-eye"></i>' 
+                : '<i class="fas fa-eye-slash"></i>';
+        });
+        
+        // Touch support for mobile
+        button.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.innerHTML = type === 'password' 
+                ? '<i class="fas fa-eye"></i>' 
+                : '<i class="fas fa-eye-slash"></i>';
+        }, { passive: false });
+    });
+    
+    // File input handling (ONLY OPTIONAL FIELD)
+    const fileInput = document.getElementById('profile_picture');
+    const fileName = document.getElementById('fileName');
+    const fileLabelText = document.getElementById('fileLabelText');
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please select a valid image file (JPEG, PNG, GIF).');
+                this.value = '';
+                fileName.textContent = '';
+                fileLabelText.textContent = 'Profile Picture (Optional)';
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                this.value = '';
+                fileName.textContent = '';
+                fileLabelText.textContent = 'Profile Picture (Optional)';
+                return;
+            }
+            
+            fileName.textContent = 'Selected: ' + file.name;
+            fileLabelText.textContent = 'Change Picture';
+        } else {
+            fileName.textContent = '';
+            fileLabelText.textContent = 'Profile Picture (Optional)';
+        }
+    });
+    
+    // Password strength checker
+    const password1 = document.getElementById('password1');
+    const strengthFill = document.getElementById('passwordStrength');
+    const strengthText = document.getElementById('passwordStrengthText');
+    
+    password1.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        let text = 'Password strength';
+        
+        // Length check
+        if (password.length >= 8) strength += 20;
+        if (password.length >= 12) strength += 20;
+        
+        // Character variety
+        if (/[a-z]/.test(password)) strength += 20;
+        if (/[A-Z]/.test(password)) strength += 20;
+        if (/[0-9]/.test(password)) strength += 10;
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+        
+        // Update UI
+        strengthFill.style.width = strength + '%';
+        
+        if (strength < 40) {
+            strengthFill.style.backgroundColor = '#e50914';
+            text = 'Weak password';
+        } else if (strength < 70) {
+            strengthFill.style.backgroundColor = '#e87c03';
+            text = 'Fair password';
+        } else {
+            strengthFill.style.backgroundColor = '#28a745';
+            text = 'Strong password';
+        }
+        
+        strengthText.textContent = text;
+        strengthText.style.color = strengthFill.style.backgroundColor;
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let hasError = false;
+        const requiredInputs = form.querySelectorAll('input[required]');
+        
+        // Remove previous errors
+        requiredInputs.forEach(input => {
+            input.classList.remove('input-error');
+        });
+        
+        // Check ALL required fields (except profile picture)
+        requiredInputs.forEach(input => {
+            // Skip profile picture validation as it's optional
+            if (input.name === 'profile_picture') return;
+            
+            if (!input.value.trim()) {
+                input.classList.add('input-error');
+                input.focus();
+                hasError = true;
+                return;
+            }
+        });
+        
+        // Check passwords match
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        
+        if (password1 !== password2) {
+            alert('Passwords do not match!');
+            document.getElementById('password1').classList.add('input-error');
+            document.getElementById('password2').classList.add('input-error');
+            hasError = true;
+        }
+        
+        // Check Gaming ID format (alphanumeric with underscores/hyphens)
+        const gamingId = form.querySelector('input[name="gaming_id"]').value;
+        if (gamingId && !/^[a-zA-Z0-9_-]+$/.test(gamingId)) {
+            alert('Gaming ID can only contain letters, numbers, underscores (_) and hyphens (-).');
+            form.querySelector('input[name="gaming_id"]').classList.add('input-error');
+            hasError = true;
+        }
+        
+        // Check phone number format
+        const phone = form.querySelector('input[name="phone"]').value;
+        if (phone && !/^[0-9+\-\s()]+$/.test(phone)) {
+            alert('Please enter a valid phone number.');
+            form.querySelector('input[name="phone"]').classList.add('input-error');
+            hasError = true;
+        }
+        
+        // Check terms checkbox
+        const terms = document.getElementById('terms');
+        if (!terms.checked) {
+            alert('You must agree to the Terms of Service and Privacy Policy.');
+            hasError = true;
+        }
+        
+        if (hasError) {
+            return;
+        }
+        
+        // Show loading state
+        submitButton.disabled = true;
+        buttonText.textContent = 'Creating Account...';
+        loadingSpinner.style.display = 'inline-block';
+        
+        // Submit form
+        setTimeout(() => {
+            form.submit();
+        }, 500);
+    });
+    
+    // Auto-remove error class on input
+    const formInputs = form.querySelectorAll('input, select');
+    formInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('input-error');
+        });
+    });
+    
+    // Prevent iOS zoom on input focus
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.fontSize = '16px';
+            });
+            input.addEventListener('blur', function() {
+                this.style.fontSize = '';
+            });
+        });
+    }
+});
+
+// Simple alert functions
+function showTerms() {
+    alert("Terms of Service:\n\n1. You must be at least 13 years old to create an account.\n2. You are responsible for maintaining the security of your account.\n3. Any abusive behavior will result in account termination.\n\nFull terms available on our website.");
+}
+
+function showPrivacy() {
+    alert("Privacy Policy:\n\nWe respect your privacy. Your personal information will only be used to provide and improve our services. We will never share your data with third parties without your consent.");
+}
+
+function showAlert(page) {
+    alert(page + " page is coming soon.");
+}
+
+// Handle browser back/forward cache
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+// Fallback background image
+document.addEventListener('DOMContentLoaded', function() {
+    const bgDiv = document.querySelector('.register-wrapper');
+    const computedStyle = window.getComputedStyle(bgDiv);
+    const bgImage = computedStyle.backgroundImage;
+    
+    if (bgImage === 'none' || bgImage.includes('undefined')) {
+        bgDiv.style.background = 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80")';
+        bgDiv.style.backgroundSize = 'cover';
+        bgDiv.style.backgroundPosition = 'center';
+    }
+});
+</script>
+
+<!-- Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock %}

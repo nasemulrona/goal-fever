@@ -1,0 +1,327 @@
+<!-- templates/core/tournament_register.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-3">{{ tournament.name }} - Team Selection</h2>
+            
+            {% if tournament_full %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Tournament is full! No more slots available.
+            </div>
+            {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Tournament Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ tournament.description }}</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Entry Fee:</strong> BDT {{ tournament.entry_fee }}</p>
+                            <p><strong>Registration Deadline:</strong> {{ tournament.registration_deadline|date:"d M Y, h:i A" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Registered:</strong> {{ total_registered }} / {{ tournament.max_teams }}</p>
+                            <p><strong>Remaining Slots:</strong> {{ remaining_slots }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST" action="{% url 'tournament_register' tournament.id %}" id="teamForm">
+                {% csrf_token %}
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Important:</strong> Once a team is selected and payment is confirmed, it cannot be selected by another player.
+                </div>
+                
+                <!-- ✅ Display error messages if any -->
+                {% if messages %}
+                <div class="messages mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h4 class="mb-3">Select Your Team</h4>
+                        
+                        {% if teams %}
+                        <div class="row">
+                            {% for team in teams %}
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                <div class="card team-card 
+                                    {% if team.is_confirmed_taken %}team-taken{% elif team.is_pending %}team-pending{% else %}team-available{% endif %}"
+                                     data-team-id="{{ team.id }}">
+                                    
+                                    <div class="card-body text-center">
+                                        <!-- Team Flag -->
+                                        <div class="team-flag mb-3">
+                                            <img src="{{ team.flag_url }}" 
+                                                 alt="{{ team.country }}" 
+                                                 class="img-fluid rounded" 
+                                                 style="width: 80px; height: 50px; object-fit: cover;">
+                                        </div>
+                                        
+                                        <!-- Team Logo/Initials -->
+                                        <div class="team-logo mb-3">
+                                            {% if team.logo %}
+                                            <img src="{{ team.logo.url }}" 
+                                                 alt="{{ team.name }}" 
+                                                 class="img-fluid rounded-circle"
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="logo-placeholder rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                                {{ team.name|slice:":2"|upper }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Team Name -->
+                                        <h5 class="card-title">{{ team.name }}</h5>
+                                        <p class="card-text text-muted">
+                                            <i class="fas fa-flag me-1"></i>
+                                            {{ team.country }}
+                                        </p>
+                                        
+                                        <!-- Selection Button - শুধু এখানে ১ বার দেখাবে -->
+                                        {% if team.is_confirmed_taken %}
+                                        <button type="button" class="btn btn-danger btn-sm" disabled>
+                                            <i class="fas fa-lock me-1"></i> Taken
+                                        </button>
+                                        {% elif team.is_pending %}
+                                        <button type="button" class="btn btn-warning btn-sm" disabled>
+                                            <i class="fas fa-clock me-1"></i> Pending
+                                        </button>
+                                        {% else %}
+                                        <button type="button" 
+                                                class="btn btn-success btn-sm select-team-btn"
+                                                data-team-id="{{ team.id }}"
+                                                data-team-name="{{ team.name }}"
+                                                onclick="selectTeam(this)">
+                                            <i class="fas fa-check me-1"></i> Select
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Hidden input for selected team -->
+                        <input type="hidden" name="team" id="selectedTeam" value="" required>
+                        
+                        <!-- Submit Button -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                                <i class="fas fa-arrow-right me-2"></i>
+                                Proceed to Payment
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Home
+                            </a>
+                        </div>
+                        
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            No teams available for selection.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .team-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+        min-height: 250px;
+    }
+    
+    .team-available:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        cursor: pointer;
+    }
+    
+    .team-taken, .team-pending {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    .team-selected {
+        border: 3px solid #198754;
+        background-color: rgba(25, 135, 84, 0.05);
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-text {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<script>
+// ✅ Team selection function
+function selectTeam(button) {
+    const teamId = button.getAttribute('data-team-id');
+    const teamName = button.getAttribute('data-team-name');
+    
+    // Reset all cards
+    document.querySelectorAll('.team-card').forEach(card => {
+        card.classList.remove('team-selected');
+    });
+    
+    // Highlight selected card
+    const selectedCard = button.closest('.team-card');
+    selectedCard.classList.add('team-selected');
+    
+    // Set hidden input value
+    document.getElementById('selectedTeam').value = teamId;
+    
+    // Enable submit button
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = `<i class="fas fa-arrow-right me-2"></i>Select ${teamName} & Proceed to Payment`;
+    
+    // Scroll to submit button
+    submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Show selection message
+    showMessage(`You have selected: ${teamName}`, 'success');
+}
+
+// ✅ Show temporary message
+function showMessage(text, type = 'info') {
+    // Remove existing message if any
+    const existingMsg = document.getElementById('selectionMessage');
+    if (existingMsg) {
+        existingMsg.remove();
+    }
+    
+    // Create new message
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'selectionMessage';
+    messageDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+    messageDiv.innerHTML = `
+        <i class="fas fa-info-circle me-2"></i>
+        ${text}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert after the form or before submit button
+    const form = document.getElementById('teamForm');
+    const submitSection = form.querySelector('.text-center');
+    form.insertBefore(messageDiv, submitSection);
+}
+
+// ✅ Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const teamForm = document.getElementById('teamForm');
+    
+    teamForm.addEventListener('submit', function(e) {
+        const selectedTeamId = document.getElementById('selectedTeam').value;
+        
+        if (!selectedTeamId) {
+            e.preventDefault();
+            showMessage('Please select a team first!', 'danger');
+            return false;
+        }
+        
+        // Get selected team card to check status
+        const selectedCard = document.querySelector(`.team-card[data-team-id="${selectedTeamId}"]`);
+        const isTaken = selectedCard.classList.contains('team-taken');
+        const isPending = selectedCard.classList.contains('team-pending');
+        
+        if (isTaken || isPending) {
+            e.preventDefault();
+            showMessage('This team is no longer available! Please select another team.', 'danger');
+            return false;
+        }
+        
+        // Get selected team name
+        const selectedButton = document.querySelector(`.select-team-btn[data-team-id="${selectedTeamId}"]`);
+        const teamName = selectedButton ? selectedButton.getAttribute('data-team-name') : '';
+        
+        // Confirmation dialog
+        const confirmed = confirm(`Are you sure you want to select ${teamName}?\n\nOnce selected and payment is completed, this team will be yours and no one else can select it.`);
+        
+        if (!confirmed) {
+            e.preventDefault();
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // ✅ Handle team card clicks (only for available teams)
+    document.querySelectorAll('.team-card.team-available').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if clicking on button (button has its own handler)
+            if (e.target.closest('button')) {
+                return;
+            }
+            
+            const button = this.querySelector('.select-team-btn');
+            if (button && !button.disabled) {
+                selectTeam(button);
+            }
+        });
+    });
+    
+    // ✅ Disable clicks on taken/pending teams
+    document.querySelectorAll('.team-card.team-taken, .team-card.team-pending').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Prevent any action on taken/pending teams
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const teamName = this.querySelector('.card-title').textContent;
+            const status = this.classList.contains('team-taken') ? 'already taken' : 'pending payment';
+            
+            showMessage(`Team ${teamName} is ${status} by another player.`, 'warning');
+        });
+    });
+    
+    // ✅ Initial check for any pre-selected team
+    const selectedTeamInput = document.getElementById('selectedTeam');
+    if (selectedTeamInput && selectedTeamInput.value) {
+        const teamId = selectedTeamInput.value;
+        const button = document.querySelector(`.select-team-btn[data-team-id="${teamId}"]`);
+        if (button) {
+            selectTeam(button);
+        }
+    }
+});
+</script>
+{% endblock %}
